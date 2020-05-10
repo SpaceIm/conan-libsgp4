@@ -29,6 +29,10 @@ class Libsgp4Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
@@ -36,7 +40,7 @@ class Libsgp4Conan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
